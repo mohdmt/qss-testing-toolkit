@@ -1,8 +1,8 @@
 #!/Users/mmotorwala/.pyenv/shims/python3
 
-from func.io import display_options, get_dump_file_name
-from func.kafka import kafka_put
-from func.processor import extract_meeting_options, process_kafka_download
+from mod.io import display_options, get_dump_file_name
+from mod.kafka import kafka_put
+from mod.processor import extract_meeting_options, process_kafka_download
 
 # Get name of dump file in ./temp/
 filename = get_dump_file_name()

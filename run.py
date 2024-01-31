@@ -1,8 +1,8 @@
 #!/Users/mmotorwala/.pyenv/shims/python3
 
-from func.io import display_options, get_rewind_count, get_speedup_factor
-from func.kafka import kafka_get, kafka_put
-from func.processor import extract_meeting_options, process_kafka_download
+from mod.io import display_options, get_rewind_count, get_speedup_factor
+from mod.kafka import kafka_get, kafka_put
+from mod.processor import extract_meeting_options, process_kafka_download
 
 # get inputs from user
 rewind_count = get_rewind_count()
