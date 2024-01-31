@@ -10,6 +10,7 @@ def get_speedup_factor():
     except ValueError:
         return None
 
+
 def get_dump_file_name():
     return input("Enter name of kafka dump file in the temp folder: ")
 
