@@ -5,8 +5,8 @@ def get_rewind_count():
 def get_speedup_factor():
     inp = input("Speedup factor")
     try:
-        input_int = int(inp)
-        return input_int
+        input_num = float(inp)
+        return input_num
     except ValueError:
         return None
 

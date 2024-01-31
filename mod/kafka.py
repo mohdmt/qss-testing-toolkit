@@ -17,7 +17,7 @@ def kafka_put(data: list[dict[str, object]], meeting_uuid: str, speedup_factor: 
             last_ts = get_epoch_from_ts(data['timestamp'])
 
         current_ts = get_epoch_from_ts(data['timestamp'])
-        sleep_for((current_ts - last_ts) // speedup_factor)
+        sleep_for(int((current_ts - last_ts) / speedup_factor))
         last_ts = current_ts
 
         run_subprocess("kafkapoke", "-topic", "incoming-call-qss-",
