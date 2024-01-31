@@ -3,7 +3,7 @@ def get_rewind_count():
 
 
 def get_speedup_factor():
-    inp = input("Speedup factor")
+    inp = input("Speedup factor: ")
     try:
         input_num = float(inp)
         return input_num
