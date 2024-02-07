@@ -43,13 +43,31 @@ def create_defaultdict(func) -> _collections_defaultdict:
     return _collections_defaultdict(func)
 
 
-def parse_args() -> tuple[bool, str]:
+def parse_args() -> tuple[bool, bool, str]:
     argc = len(_sys_argv)
+
+    # parse is_spaced
+    is_spaced = False
+    if _sys_argv[-1] == '-s':
+        _sys_argv.pop()
+        argc -= 1
+        is_spaced = True
+
+    # validate rest of args
     if argc < 2 or argc > 3 or (_sys_argv[1] != 'LOCAL' and _sys_argv[1] != 'NONLOCAL'):
-        print("USAGE: ./run.py (LOCAL|NONLOCAL) [dump_file_name]")
+        print("USAGE: ./run.py (LOCAL|NONLOCAL) [dump_file_name] [-s]")
         raise ValueError
 
-    return _sys_argv[1] == 'LOCAL', 'temp/dump.txt' if argc == 2 else _sys_argv[2]
+    # parse dump file name
+    dump_file_name = 'temp/dump.txt'
+    if argc == 3:
+        dump_file_name = _sys_argv.pop()
+        argc -= 1
+
+    # parse locality
+    is_local = _sys_argv[1] == 'LOCAL'
+
+    return is_local, is_spaced, dump_file_name
 
 
 def local_get(filename: str) -> str:

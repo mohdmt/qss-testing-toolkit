@@ -1,6 +1,6 @@
 #!/Users/mmotorwala/.pyenv/shims/python3
 
-from mod.io import (display_options, get_rewind_count,get_speedup_factor)
+from mod.io import display_options, get_rewind_count, get_speedup_factor
 from mod.kafka import kafka_get, kafka_put
 from mod.processor import extract_meeting_options, process_kafka_download
 from mod.utils import local_get, parse_args
@@ -8,10 +8,13 @@ from mod.utils import local_get, parse_args
 
 def main():
     try:
-        is_local, dump_file_name = parse_args()
+        is_local, is_spaced, dump_file_name = parse_args()
 
         # get inputs from user (if needed) and retrieve data
-        speedup_factor = get_speedup_factor()
+        speedup_factor = 1
+        if not is_spaced:
+            speedup_factor = get_speedup_factor()
+
         if is_local:
             downloaded_data = local_get(dump_file_name)
         else:
@@ -26,7 +29,8 @@ def main():
         choice = display_options(meeting_options)
 
         # poke data at intervals
-        kafka_put(processed_kafka_data, meeting_options[choice][0], speedup_factor)
+        kafka_put(processed_kafka_data,
+                  m_filter=meeting_options[choice][0], speedup_factor=speedup_factor, is_spaced=is_spaced)
     except ValueError:
         return
 
