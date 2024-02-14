@@ -1,3 +1,6 @@
+from .utils import parse_message
+
+
 def get_rewind_count():
     return int(input("Rewind count from wh-call-qss: "))
 
@@ -15,7 +18,7 @@ def get_dump_file_name():
     return input("Enter name of kafka dump file in the temp folder: ")
 
 
-def display_options(options_list: list[tuple[str, int, int]]) -> int:
+def display_meeting_options(options_list: list[tuple[str, int, int]]) -> int:
     while True:
         print("\n\nSelect index of the meeting ID to be kafkapoke'd:")
         for idx, (meeting_uuid, object_count) in enumerate(options_list):
@@ -26,3 +29,19 @@ def display_options(options_list: list[tuple[str, int, int]]) -> int:
                 f"\nSending messages from meeting UUID {options_list[choice][0]} to incoming-call-qss-")
             return choice
         print(f"Index should be between {0} and {len(options_list) - 1}")
+
+
+def display_message_options(target_meeting: list[dict[str, object]], user_dict: dict[str, str]):
+    for i, message in enumerate(target_meeting):
+        payload = message.get('payload', {})
+        ev_type = payload.get('event', '')
+        message_summary = parse_message(ev_type=ev_type,
+                                        payload=payload, user_dict=user_dict)
+        print(f"{i:03}) {message_summary}")
+    while True:
+        required = input('Enter required idx: ')
+        if required < 0 or required >= len(target_meeting):
+            print(
+                f"Invalid idx - must be between {0} and {len(target_meeting)}")
+        else:
+            return required

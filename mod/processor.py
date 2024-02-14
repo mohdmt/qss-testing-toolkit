@@ -1,4 +1,7 @@
 from .utils import create_defaultdict, json_loads
+from .io import display_message_options
+
+last_ts = None
 
 
 def process_kafka_download(input_data: str) -> list[dict[str, object]]:
@@ -38,3 +41,38 @@ def extract_meeting_options(data: list[dict[str, object]]) -> list[tuple[str, in
     flat_list = list(
         map(lambda x: (x[0], x[1][0], x[1][1]), meeting_object_counts.items()))
     return list(map(lambda x: (x[0], x[1]), sorted(flat_list, key=lambda x: x[2])))
+
+
+def create_user_dict(*, meeting: list[dict[str, object]]):
+    filtered_by_events = filter(
+        lambda x: x['event'] == 'meeting.participant_data', meeting)
+    flattened_participants = map(
+        lambda x: x['payload']['data']['participant']['participant_id'], filtered_by_events)
+    participant_id_seen = set()
+    unique_participant_ids = [participant_id for participant_id in flattened_participants if not (
+        participant_id in participant_id_seen or participant_id_seen.add(participant_id))]
+    return {participant_id: i for i, participant_id in enumerate(unique_participant_ids)}
+
+
+def get_next_idx(*, target_meeting: list[dict[str, object]], user_dict: dict[str, str], is_described: bool = False):
+    if target_meeting is None or len(target_meeting) == 0 or user_dict is None:
+        return None
+
+    if not is_described:
+        return 0
+    else:
+        return display_message_options(target_meeting, user_dict)
+
+
+def get_sleep_interval(*, next_ts: int, speedup_factor: int, is_spaced: bool, is_described: bool):
+    global last_ts
+    if is_spaced:
+        input("PRESS ENTER TO SEND A NEW MESSAGE: ")
+        return 0
+    elif is_described:
+        return 0
+
+    sleep_duration = int(max(next - last_ts, 1) /
+                         max(speedup_factor, 0.000000001))
+    last_ts = next_ts
+    return sleep_duration
