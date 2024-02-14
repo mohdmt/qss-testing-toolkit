@@ -14,7 +14,7 @@ def kafka_put(data: list[dict[str, object]], m_filter: str = None, speedup_facto
         data, key=lambda x: get_epoch_from_ts(x['timestamp']))
 
     last_ts = None
-    for dat in data:
+    for i, dat in enumerate(data, start=1):
         if last_ts == None:
             last_ts = get_epoch_from_ts(dat['timestamp'])
 
@@ -26,7 +26,7 @@ def kafka_put(data: list[dict[str, object]], m_filter: str = None, speedup_facto
 
         # space out messages but either a timeout or input
         if is_spaced:
-            print("PRESS ENTER TO SEND A NEW MESSAGE", end='')
+            print(f"PRESS ENTER TO SEND A NEW MESSAGE ({i})", end='')
             input()
         else:
             sleep_for(int(max(current_ts - last_ts, 1) / max(speedup_factor, 0.000000001)))
