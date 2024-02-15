@@ -1,9 +1,12 @@
 #!/Users/mmotorwala/.pyenv/shims/python3
 
-from mod.io import display_meeting_options, get_rewind_count, get_speedup_factor
+from mod.io import (display_finished_message, display_meeting_options,
+                    get_rewind_count, get_speedup_factor)
 from mod.kafka import kafka_get, kafka_put
-from mod.processor import extract_meeting_options, process_kafka_download, get_next_idx, get_sleep_interval, create_user_dict
-from mod.utils import local_get, parse_args, filter_dataset
+from mod.processor import (create_user_dict, extract_meeting_options,
+                           get_next_idx, get_sleep_interval,
+                           process_kafka_download)
+from mod.utils import filter_dataset, local_get, parse_args
 
 
 def main():
@@ -30,7 +33,7 @@ def main():
 
         # only retreive indicated meeting and create user id mapping
         target_meeting = filter_dataset(
-            dataset=meeting_options, filter_value=meeting_choice, filter_key='id')
+            dataset=processed_kafka_data, filter_value=meeting_choice, filter_key='payload.data.uuid')
         user_dict = create_user_dict(meeting=target_meeting)
 
         while True:
@@ -44,7 +47,7 @@ def main():
             # poke data at intervals
             kafka_put(data=target_message, sleep_duration=sleep_duration)
 
-        print("FINISHED SENDING MESSAGES TO KAFKA!")
+        display_finished_message()
     except ValueError:
         return
 
