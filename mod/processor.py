@@ -79,7 +79,7 @@ def get_sleep_interval(*, next_ts: int, speedup_factor: int, is_spaced: bool, is
     elif is_described:
         return 0
 
-    sleep_duration = int(max(next - last_ts, 1) /
+    sleep_duration = int(max(next_ts - last_ts, 1) /
                          max(speedup_factor, 0.000000001))
     last_ts = next_ts
     return sleep_duration
