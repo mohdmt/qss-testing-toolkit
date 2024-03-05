@@ -1,5 +1,6 @@
 from .io import display_message_options
-from .utils import create_defaultdict, deepcopy_object, json_loads
+from .utils import (create_defaultdict, date_add, date_diff, deepcopy_object,
+                    get_current_time_utc, get_epoch_from_ts, json_loads)
 
 last_ts = None
 
@@ -71,8 +72,14 @@ def get_next_idx(*, target_meeting: list[dict[str, object]], user_dict: dict[str
         return display_message_options(target_meeting, user_dict)
 
 
-def get_sleep_interval(*, next_ts: int, speedup_factor: int, is_spaced: bool, is_described: bool):
+def get_sleep_interval(*, next_ts_str: str, speedup_factor: int, is_spaced: bool, is_described: bool):
     global last_ts
+
+    next_ts = get_epoch_from_ts(next_ts_str)
+
+    if last_ts is None:
+        last_ts = next_ts
+
     if is_spaced:
         input("PRESS ENTER TO SEND A NEW MESSAGE: ")
         return 0
@@ -83,3 +90,37 @@ def get_sleep_interval(*, next_ts: int, speedup_factor: int, is_spaced: bool, is
                          max(speedup_factor, 0.000000001))
     last_ts = next_ts
     return sleep_duration
+
+def currentify_timestamps(data: dict[str, object]):
+    current_time = get_current_time_utc()
+    diff_seconds = date_diff(data['timestamp'], current_time)
+
+    data['timestamp'] = date_add(data['timestamp'], diff_seconds)
+    data['payload']['event_rx_ts'] = get_epoch_from_ts(date_add(int(data['payload']['event_rx_ts'])//1000, diff_seconds))
+    data['payload']['when'] = get_epoch_from_ts(date_add(int(data['payload']['when'])//1000, diff_seconds))
+    payload_data: dict = data['payload']['data']
+    match data['payload']['event']:
+        case "meeting.participant_qos":
+            for qos in payload_data.get('participant', {}).get('qos', []):
+                qos['date_time'] = date_add(qos['date_time'], diff_seconds)
+        case "meeting.participant_data_summary":
+            pass
+        case "meeting.participant_left":
+            payload_data['start_time'] = date_add(payload_data.get('start_time', None), diff_seconds)
+            if participant := payload_data.get('participant', None):
+                participant['leave_time'] = date_add(participant.get('leave_time', None), diff_seconds)
+        case "meeting.participant_feedback":
+            pass
+        case "meeting.ended":
+            payload_data['start_time'] = date_add(payload_data.get('start_time', None), diff_seconds)
+            payload_data['end_time'] = date_add(payload_data.get('end_time', None), diff_seconds)
+        case "meeting.participant_qos_summary":
+            pass
+        case "meeting.started":
+            payload_data['start_time'] = date_add(payload_data.get('start_time', None), diff_seconds)
+        case "meeting.participant_data":
+            pass
+        case "meeting.participant_joined":
+            payload_data['start_time'] = date_add(payload_data.get('start_time', None), diff_seconds)
+            if participant := payload_data.get('participant', None):
+                participant['join_time'] = date_add(participant.get('join_time', None), diff_seconds)

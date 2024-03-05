@@ -43,7 +43,7 @@ def main():
                 break
             target_message = target_meeting.pop(message_idx)
             sleep_duration = get_sleep_interval(
-                next_ts=target_message['timestamp'], speedup_factor=speedup_factor, is_spaced=is_spaced, is_described=is_described)
+                next_ts_str=target_message['timestamp'], speedup_factor=speedup_factor, is_spaced=is_spaced, is_described=is_described)
             # poke data at intervals
             kafka_put(data=target_message, sleep_duration=sleep_duration)
 

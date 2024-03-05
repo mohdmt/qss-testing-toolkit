@@ -1,11 +1,14 @@
+import datetime as _dt
 import subprocess as _subprocess
 from collections import defaultdict as _collections_defaultdict
 from copy import deepcopy as _copy_deepcopy
+from datetime import datetime as _datetime
 from functools import reduce as _functools_reduce
 from json import dumps as _json_dumps
 from json import loads as _json_loads
 from sys import argv as _sys_argv
 from time import sleep as _time_sleep
+from typing import Optional
 
 from dateutil.parser import parse as _parse_dt
 
@@ -137,3 +140,20 @@ def deepcopy_object(obj: object):
 
 def clear_terminal():
     _subprocess.call(['tput', 'reset'])
+
+
+def get_current_time_utc():
+    return _datetime.now(_dt.UTC).isoformat()
+
+
+def date_diff(date_1: str, date_2: str) -> int:
+    return get_epoch_from_ts(date_2) - get_epoch_from_ts(date_1)
+
+
+def date_add(date_1: Optional[str | int], offset: int) -> Optional[str]:
+    if date_1 is None:
+        return None
+    if isinstance(date_1, str):
+        date_1 = get_epoch_from_ts(date_1)
+
+    return _datetime.fromtimestamp(date_1 + offset, _dt.UTC).isoformat()
